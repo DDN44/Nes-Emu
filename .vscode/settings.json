@@ -3,6 +3,8 @@
     "files.associations": {
         "stdio.h": "c",
         "common.h": "c",
-        "cpu.h": "c"
+        "cpu.h": "c",
+        "stdint.h": "c",
+        "raylib.h": "c"
     }
 }
