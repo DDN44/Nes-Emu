@@ -1,4 +1,4 @@
-#include "stdio.h"
+#include <stdio.h>
 #include "memory.c"
 #include "./cpu/cpu.c"
 #include "./cpu/cpu.h"
@@ -18,20 +18,20 @@ int main(int argc, char *argv[])
     InitWindow(screenWidth, screenHeight, "Emulator");
 
     SetTargetFPS(5000);
-    if(argc < 2)
-    {
-        printf("Input a file name please :)\n");
-        return 1;
-    }
+    //if(argc < 2)
+    //{
+    //    printf("Input a file name please :)\n");
+    //    return 1;
+    //}
 
-    char *infile = argv[1];
+    //char *infile = argv[1];
     cpu_load_bin("bin.bin");
     cpu_init();
     pc = 0x8000;
 
     buffer = GenImageColor(800, 600, WHITE);
     textur = LoadTextureFromImage(buffer);
-    while (1)
+    while (!WindowShouldClose())
     {
         
         BeginDrawing();

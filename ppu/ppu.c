@@ -25,7 +25,7 @@ void ppu_execute()
 {
     if((ppucycles < 256) && (scanlines < 240))
     {
-        ImageDrawPixel(&buffer, ppucycles, scanlines, ORANGE);
+        buffer.data = 
     }
     ppucycles++;
     if(scanlines > 260)
