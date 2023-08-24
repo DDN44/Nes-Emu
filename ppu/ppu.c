@@ -3,7 +3,7 @@
 #include "../memory.h"
 #include "../cpu/cpu.h"
 #include "../common.h"
-//#include <raylib.h>
+#include <raylib.h>
 
 uint8_t *PPUCTRL = &cpu_mem[0x2000];
 uint8_t *PPUMASK = &cpu_mem[0x2001];
@@ -17,15 +17,39 @@ uint64_t ppucycles = 0;
 uint64_t scanlines = 0;
 uint64_t drawing = 0;
 
+uint16_t ppux = 0;
+uint16_t ppuy = 0;
+
+uint8_t val_r = 255;
+uint8_t val_g = 0;
+uint8_t val_b = 0;
+uint8_t alpha = 255;
 
 Image buffer;
 Texture2D textur;
+Color *pixels;
+uint8_t frameout;
+
+void ppu_init()
+{
+    pixels = buffer.data;
+}
 
 void ppu_execute()
 {
-    if((ppucycles < 256) && (scanlines < 240))
+    ppux++;
+    if(ppux >= 256)
     {
-        buffer.data = 
+        ppux = 0;
+        ppuy++;
+    }
+    if(ppuy > 240)
+    {
+        ppuy = 0;
+    }
+    if(scanlines < 240)
+    {
+        pixels[ppux + (ppuy * buffer.width)] = (Color){val_r, val_g, val_b, alpha};
     }
     ppucycles++;
     if(scanlines > 260)
@@ -35,8 +59,8 @@ void ppu_execute()
     if((ppucycles >= 341) && (scanlines >= 240))
     {
         ppucycles = 0;
-        UnloadTexture(textur);
-        textur = LoadTextureFromImage(buffer);
+        UpdateTexture(textur, pixels);
+        frameout = 1;
     }
     if(ppucycles >= 341)
     {

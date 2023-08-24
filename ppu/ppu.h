@@ -11,3 +11,4 @@ extern uint8_t *PPUADDR;
 extern uint8_t *PPUDATA;
 extern Image buffer;
 extern Texture2D textur;
+extern Color *pixels;

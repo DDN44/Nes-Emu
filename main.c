@@ -7,17 +7,20 @@
 #include "common.h"
 #include <raylib.h>
 
-const int screenWidth = 800;
-const int screenHeight = 600;
+const int screenWidth = 256;
+const int screenHeight = 240;
+
+Color *pixels;
+uint8_t frameout = 0;
 
 //yes i know there is a lack of comments
 
 int main(int argc, char *argv[])
 {
-    SetTraceLogLevel(7);
+    //SetTraceLogLevel(7);
     InitWindow(screenWidth, screenHeight, "Emulator");
 
-    SetTargetFPS(5000);
+    SetTargetFPS(60);
     //if(argc < 2)
     //{
     //    printf("Input a file name please :)\n");
@@ -27,26 +30,27 @@ int main(int argc, char *argv[])
     //char *infile = argv[1];
     cpu_load_bin("bin.bin");
     cpu_init();
+    ppu_init();
     pc = 0x8000;
 
-    buffer = GenImageColor(800, 600, WHITE);
+    buffer = GenImageColor(256, 240, BLACK);
     textur = LoadTextureFromImage(buffer);
     while (!WindowShouldClose())
     {
-        
         BeginDrawing();
+        ppu_init();
         ClearBackground(RAYWHITE);
         DrawTexture(textur, 0, 0, WHITE);
         DrawFPS(0, 0);
+        frameout = 0;
         EndDrawing();
-        
         //printf("%d", GetKeyPressed());
         //getchar();
         if(1/*IsKeyDown(265) | IsKeyPressed(264)*/)
         {
             cpu_check_nmi();
             cpu_execute(cpu_read_mem(pc));
-            cpu_status();
+            //cpu_status();
         
             for(uint8_t i = 0; i < (cycles * 3); i++)
             {
