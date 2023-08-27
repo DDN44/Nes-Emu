@@ -18,32 +18,39 @@ uint8_t frameout = 0;
 int main(int argc, char *argv[])
 {
     //SetTraceLogLevel(7);
-    InitWindow(screenWidth, screenHeight, "Emulator");
-
-    SetTargetFPS(60);
+    window_init();
     //if(argc < 2)
     //{
     //    printf("Input a file name please :)\n");
     //    return 1;
     //}
-
     //char *infile = argv[1];
     cpu_load_bin("bin.bin");
     cpu_init();
     ppu_init();
+    ppu_load_palette();
     pc = 0x8000;
 
     buffer = GenImageColor(256, 240, BLACK);
     textur = LoadTextureFromImage(buffer);
+    
+    BeginDrawing();
+    ppu_init();
+    DrawTexture(textur, 0, 0, WHITE);
+    DrawFPS(0, 0);
+    EndDrawing();
+
     while (!WindowShouldClose())
     {
-        BeginDrawing();
-        ppu_init();
-        ClearBackground(RAYWHITE);
-        DrawTexture(textur, 0, 0, WHITE);
-        DrawFPS(0, 0);
-        frameout = 0;
-        EndDrawing();
+        if(frameout == 1)
+        {
+            BeginDrawing();
+            ppu_init();
+            DrawTexture(textur, 0, 0, WHITE);
+            DrawFPS(0, 0);
+            EndDrawing();
+        }
+
         //printf("%d", GetKeyPressed());
         //getchar();
         if(1/*IsKeyDown(265) | IsKeyPressed(264)*/)
@@ -58,6 +65,7 @@ int main(int argc, char *argv[])
             }
         }
     }
+    
 
     CloseWindow();
 

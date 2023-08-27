@@ -48,8 +48,8 @@ void cpu_write_mem(uint16_t addr, uint8_t data)
 void cpu_load_bin(char *text)
 {
     uint8_t buff = 0;
-    uint8_t* pbuff = &buff;
-    FILE * fp;
+    uint8_t *pbuff = &buff;
+    FILE *fp;
     fp = fopen(text, "r");
     uint16_t i = 0;
     while(i < 0xFFFF)
