@@ -79,6 +79,18 @@ uint16_t cpu_pop16()
     return ((cpu_read_mem(sp + 0x100) << 8) + temp);
 }
 
+uint16_t cpu_index_addr(uint8_t ind, uint8_t addr)
+{
+    addr += ind;
+    return addr;
+}
+
+uint16_t cpu_index_addr16(uint8_t ind, uint16_t addr)
+{
+    addr += ind;
+    return addr;
+}
+
 uint16_t cpu_op_addr()
 {
     uint16_t atemp = cpu_read_mem(pc + 2);
@@ -140,6 +152,61 @@ void cpu_zeropage_y(uint8_t var)
     cpu_write_mem(temp, var);
 }
 
+uint8_t cpu_asl(uint8_t var, uint8_t count)
+{
+    int8_t temp = var;
+    temp = temp << count;
+    var = temp;
+    return var;
+}
+
+uint8_t cpu_asr(uint8_t var, uint8_t count)
+{
+    int8_t temp = var;
+    temp = temp >> count;
+    var = temp;
+    return var;
+}
+
+void cpu_check_zero(uint8_t in)
+{
+    if(in == 0)
+    {
+        status = status | 0b00000010;
+    }else
+    {
+        status = cpu_disable_bit(1, 0);
+    }
+}
+
+void cpu_check_neg(uint8_t in)
+{
+    if(in >= 128)
+    {
+        status = status | 0b10000000;
+    }else
+    {
+        status = cpu_disable_bit(7, 1);
+    }
+}
+
+uint16_t cpu_indirectx()
+{
+    uint16_t atemp;
+    atemp = cpu_read_mem(cpu_read_mem(pc + 1) + x + 1) << 8;
+    atemp += cpu_read_mem(cpu_read_mem(pc + 1) + x);
+    return atemp;
+}
+
+uint16_t cpu_indirecty()
+{
+    uint16_t atemp;
+    uint16_t ytemp = y;
+    atemp = cpu_read_mem(cpu_read_mem(pc + 1) + ytemp + 1) << 8;
+    atemp += cpu_read_mem(cpu_read_mem(pc + 1) + ytemp);
+    return atemp;
+}
+
 void cpu_execute(uint8_t op)
 {
     switch(op)
@@ -151,13 +218,23 @@ void cpu_execute(uint8_t op)
             pc = (cpu_read_mem(0xFFFF) << 8) + cpu_read_mem(0xFFFE);
             cycles = 7;
             break;
+        case 0x01:
+            a |= cpu_read_mem(cpu_index_addr(x, cpu_read_mem(pc + 1)));
+            cpu_check_zero(a);
+            cpu_check_neg(a);
+            break;
+        case 0x05:
+            a |= cpu_read_mem(cpu_read_mem(pc + 1));
+            cpu_check_zero(a);
+            cpu_check_neg(a);
+            break;
         case 0x10:
             if((status >> 7) == 0)
             {
                 pc = cpu_relative_addr();
             }else
             {
-                pc = pc + 2;
+                pc += 2;
             }
             cycles = 2;
             break;
@@ -172,105 +249,103 @@ void cpu_execute(uint8_t op)
                 pc = cpu_relative_addr();
             }else
             {
-                pc = pc + 2;
+                pc += 2;
             }
             cycles = 2;
+            break;
+        case 0x60:
+            pc = cpu_pop16();
+            pc++;
+            cycles = 6;
             break;
         case 0x78:
             status = status | 0b00000100;
             pc++;
             cycles = 2;
             break;
+        case 0x81:
+            cpu_write_mem(cpu_indirectx(), a);
+            pc += 2;
+            cycles = 6;
+            break;
         case 0x85:
             cpu_zeropage(a);
-            pc ++;
+            pc += 2;
             cycles = 3;
             break;
         case 0x8D:
             cpu_save_addr(a);
-            pc = pc + 3;
+            pc += 3;
             cycles = 4;
+            break;
+        case 0x91:
+            cpu_write_mem(cpu_indirecty(), a);
+            pc += 2;
+            cycles = 6;
+            break;
+        case 0x95:
+            cpu_write_mem(cpu_index_addr(x, cpu_read_mem(pc + 1)), a);
+            pc += 2;
+            cycles = 4;
+            break;
+        case 0x99:
+            cpu_write_mem(cpu_index_addr16(y, cpu_op_addr()), a);
+            pc +=3;
+            cycles = 5;
             break;
         case 0x9A:
             sp = x;
             pc++;
             cycles = 2;
             break;
+        case 0x9D:
+            cpu_write_mem(cpu_index_addr16(x, cpu_op_addr()), a);
+            pc +=3;
+            cycles = 5;
+            break;
         case 0xA0:
             y = cpu_read_mem(pc + 1);
-            if(y == 0)
-            {
-                status = status | 0b00000010;
-            }else
-            {
-                status = cpu_disable_bit(1, 0);
-            }
-            if(y >= 128)
-            {
-                status = status | 0b10000000;
-            }else
-            {
-                status = cpu_disable_bit(7, 1);
-            }
-            pc = pc + 2;
+            cpu_check_zero(y);
+            cpu_check_neg(y);
+            pc += 2;
             cycles = 2;
             break;
         case 0xA2:
             x = cpu_read_mem(pc + 1);
-            if(x == 0)
-            {
-                status = status | 0b00000010;
-            }else
-            {
-                status = cpu_disable_bit(1, 0);
-            }
-            if(x >= 128)
-            {
-                status = status | 0b10000000;
-            }else
-            {
-                status = cpu_disable_bit(7, 1);
-            }
-            pc = pc + 2;
+            cpu_check_zero(x);
+            cpu_check_neg(x);
+            pc += 2;
             cycles = 2;
             break;
         case 0xA9:
             a = cpu_read_mem(pc + 1);
-            if(a == 0)
-            {
-                status = status | 0b00000010;
-            }else
-            {
-                status = cpu_disable_bit(1, 0);
-            }
-            if(x >= 128)
-            {
-                status = status | 0b10000000;
-            }else
-            {
-                status = cpu_disable_bit(7, 1);
-            }
-            pc = pc + 2;
+            cpu_check_zero(a);
+            cpu_check_neg(a);
+            pc += 2;
             cycles = 2;
             break;
         case 0xAD:
             a = cpu_read_mem(cpu_op_addr());
-            if(a == 0)
-            {
-                status = status | 0b00000010;
-            }else
-            {
-                status = cpu_disable_bit(1, 0);
-            }
-            if(a >= 128)
-            {
-                status = status | 0b10000000;
-            }else
-            {
-                status = cpu_disable_bit(7, 1);
-            }
-            pc = pc + 3;
+            cpu_check_zero(a);
+            cpu_check_neg(a);
+            pc += 3;
             cycles = 4;
+            break;
+        case 0xC8:
+            y += 1;
+            cpu_check_zero(y);
+            cpu_check_neg(y);
+            cycles = 2;
+            break;
+        case 0xD0:
+            if(((status << 6) >> 7) == 0)
+            {
+                pc += 2;
+            }else
+            {
+                pc = cpu_relative_addr();
+            }
+            cycles = 2;
             break;
         case 0xD8:
             status = cpu_disable_bit(3, 0);

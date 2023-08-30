@@ -14,6 +14,7 @@ uint8_t *OAMDATA = &cpu_mem[0x2004];
 uint8_t *PPUSCROLL = &cpu_mem[0x2005];
 uint8_t *PPUADDR = &cpu_mem[0x2006];
 uint8_t *PPUDATA = &cpu_mem[0x2007];
+
 uint64_t ppucycles = 0;
 uint64_t scanlines = 0;
 uint64_t drawing = 0;
@@ -87,7 +88,7 @@ void ppu_execute()
     }
     if(scanlines < 240)
     {
-        pixels[ppux + (scanlines * buffer.width)] = palette[5];//(Color){val_r, val_g, val_b, alpha};
+        pixels[ppux + (scanlines * buffer.width)] = palette[current_color];//(Color){val_r, val_g, val_b, alpha};
     }
     ppucycles++;
     if(scanlines > 260)

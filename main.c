@@ -18,6 +18,7 @@ uint8_t frameout = 0;
 int main(int argc, char *argv[])
 {
     //SetTraceLogLevel(7);
+    SetTargetFPS(60);
     window_init();
     //if(argc < 2)
     //{

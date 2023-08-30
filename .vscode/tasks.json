@@ -8,8 +8,11 @@
                 "-fdiagnostics-color=always",
                 "-g",
                 "${file}",
+                "${fileDirname}\\raylib.dll",
                 "-o",
-                "${fileDirname}\\${fileBasenameNoExtension}.exe"
+                "${fileDirname}\\${fileBasenameNoExtension}.exe",
+                "-I ${fileDirname}\\include",
+                "-L ${fileDirname}\\lib"
             ],
             "options": {
                 "cwd": "${fileDirname}"
