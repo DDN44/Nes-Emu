@@ -1,6 +1,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include "memory.h"
+#include "common.h"
 #ifndef _6502_MEM_
 #define _6502_MEM_
 uint8_t cpu_mem[0x10000];
@@ -27,6 +28,10 @@ uint8_t cpu_read_mem(uint16_t addr)
 
 void cpu_write_mem(uint16_t addr, uint8_t data)
 {
+    if(addr == 0x4014)
+    {
+        ppu_dma = 1;
+    }
     if(addr >= 0x0800 && addr <= 0x1FFF)
     {
         int base = addr % 0x800;
@@ -60,6 +65,22 @@ void cpu_load_bin(char *text)
     }
     fread(pbuff, 1, 1, fp);
     cpu_mem[i] = buff;
+    fclose(fp);
+}
+
+void ppu_load_bin(char *text)
+{
+    uint8_t buff = 0;
+    uint8_t *pbuff = &buff;
+    FILE *fp;
+    fp = fopen(text, "r");
+    uint16_t i = 0;
+    while(i <= 0x4000)
+    {
+        fread(pbuff, 1, 1, fp);
+        ppu_mem[i] = buff;
+        i++;
+    }
     fclose(fp);
 }
 #endif

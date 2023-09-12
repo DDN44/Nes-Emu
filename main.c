@@ -27,6 +27,7 @@ int main(int argc, char *argv[])
     //}
     //char *infile = argv[1];
     cpu_load_bin("bin.bin");
+    ppu_load_bin("ppu.bin");
     cpu_init();
     ppu_init();
     ppu_load_palette();

@@ -209,6 +209,10 @@ uint16_t cpu_indirecty()
 
 void cpu_execute(uint8_t op)
 {
+    if(ppu_dma == 1)
+    {
+        return;
+    }
     switch(op)
     {
         case 0x00:
