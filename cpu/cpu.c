@@ -335,6 +335,13 @@ void cpu_execute(uint8_t op)
             pc += 3;
             cycles = 4;
             break;
+        case 0xBD:
+            a = cpu_read_mem(cpu_index_addr16(x, cpu_op_addr()));
+            cpu_check_zero(a);
+            cpu_check_neg(a);
+            pc += 3;
+            cycles = 4;
+            break;
         case 0xC8:
             y += 1;
             cpu_check_zero(y);
@@ -355,6 +362,9 @@ void cpu_execute(uint8_t op)
             status = cpu_disable_bit(3, 0);
             pc++;
             cycles = 2;
+            break;
+        default:
+            cycles = 1;
             break;
     }
 }

@@ -104,8 +104,12 @@ void window_init()
 
 uint8_t ppu_calc_pix()
 {
+    if(scanlines > 240)
+    {
+        return (uint8_t)0;
+    }
     current_tile = ppu_nt1[x / 8];
-    current_index = (((ppu_pt1[(current_tile << 4) + (x % 8)] << (7 - (8 - (x % 8)))) >> 7) << 1) | ((ppu_pt1[(current_tile << 4) + (8 + (x % 8))] << (7 - (8 - (x % 8)))) >> 7);
+    current_index = (((ppu_pt1[(current_tile << 4) + (scanlines % 8)] << (7 - (8 - (x % 8)))) >> 7) << 1) | ((ppu_pt1[(current_tile << 4) + (8 + (scanlines % 8))] << (7 - (8 - (x % 8)))) >> 7);
     if(current_index = 0)
     {
         return current_color;
@@ -122,10 +126,12 @@ void ppu_execute()
     {
         uint16_t dma_addr = (*OAMDMA << 8);
         uint8_t i = 0;
-        while(i < 0xFF)
+        while(i <= 0xFF)
         {
             ppu_oam[*OAMADDR + i] = cpu_read_mem(dma_addr + i);
+            i++;
         }
+        ppu_dma = 0;
     }
     ppu_oam[*OAMADDR] = *OAMDATA;
     ppux++;
